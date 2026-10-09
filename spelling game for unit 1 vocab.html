@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit 1 Vocabulary Spelling Game</title>
+    <style>
+        :root {
+            --primary-color: #27ae60;
+            --primary-dark: #1e8449;
+            --bg-color: #eef2f5;
+            --card-bg: #ffffff;
+            --text-color: #2c3e50;
+            --correct-color: #27ae60;
+            --incorrect-color: #e74c3c;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 650px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            box-sizing: border-box;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            font-size: 1.4rem;
+            margin: 0;
+            color: var(--primary-color);
+        }
+
+        .score-box {
+            font-size: 1.1rem;
+            font-weight: bold;
+            background: #e8f8f5;
+            color: var(--primary-dark);
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid #a3e4d7;
+        }
+
+        .card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .type-badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: #e0f2fe;
+            color: #0369a1;
+            margin-bottom: 10px;
+        }
+
+        .prompt {
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #d97706;
+            margin-bottom: 8px;
+        }
+
+        .clue {
+            font-size: 0.95rem;
+            color: #4b5563;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 10px 14px;
+            font-size: 1rem;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            outline: none;
+            text-transform: uppercase;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary-color);
+        }
+
+        .mc-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .mc-btn {
+            background: #ffffff;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 10px 14px;
+            text-align: left;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-color);
+        }
+
+        .mc-btn:hover {
+            border-color: var(--primary-color);
+            background: #f0fdf4;
+        }
+
+        .action-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .action-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .feedback {
+            margin-top: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            min-height: 22px;
+        }
+
+        .feedback.correct {
+            color: var(--correct-color);
+        }
+
+        .feedback.incorrect {
+            color: var(--incorrect-color);
+        }
+
+        .completion-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .completion-screen h2 {
+            color: var(--primary-color);
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .restart-btn {
+            margin-top: 20px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <div class="header">
+        <h1>Green Spaces Spelling</h1>
+        <div class="score-box">Score: <span id="score">0</span> / <span id="total-questions">10</span></div>
+    </div>
+
+    <div id="game-body">
+        <div class="card">
+            <div class="type-badge" id="type-badge">Word Scramble</div>
+            <div class="prompt" id="prompt">E - L - V - E - A - T - D - E</div>
+            <div class="clue" id="clue">Clue: Raised; high above the ground (adj.)</div>
+
+            <div id="interaction-area">
+                <!-- Injected dynamically -->
+            </div>
+            <div id="feedback" class="feedback"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        {
+            type: "scramble",
+            badge: "Word Scramble",
+            prompt: "E - L - V - E - A - T - D - E",
+            clue: "Raised; high above the ground (adj.)",
+            answer: "ELEVATED"
+        },
+        {
+            type: "scramble",
+            badge: "Word Scramble",
+            prompt: "Y - O - G - N - E - X",
+            clue: "A gas with no smell or color that living things need (n.)",
+            answer: "OXYGEN"
+        },
+        {
+            type: "scramble",
+            badge: "Word Scramble",
+            prompt: "E - V - N - A - U - E",
+            clue: "A wide road with trees or tall buildings on both sides (n.)",
+            answer: "AVENUE"
+        },
+        {
+            type: "vowel",
+            badge: "Missing Vowels",
+            prompt: "R __ D __ C __",
+            clue: "To make something smaller in size or amount (v.)",
+            answer: "REDUCE"
+        },
+        {
+            type: "vowel",
+            badge: "Missing Vowels",
+            prompt: "C R __ W D __ D",
+            clue: "Full of people (adj.)",
+            answer: "CROWDED"
+        },
+        {
+            type: "vowel",
+            badge: "Missing Vowels",
+            prompt: "P R __ T __ C T",
+            clue: "To keep someone or something safe from harm (v.)",
+            answer: "PROTECT"
+        },
+        {
+            type: "mc",
+            badge: "Spelling Bee",
+            prompt: "Select the correct spelling:",
+            clue: "A visit to a place to look around and learn about it (n.)",
+            options: ["Toor", "Tour", "Tuor"],
+            answer: "Tour"
+        },
+        {
+            type: "mc",
+            badge: "Spelling Bee",
+            prompt: "Select the correct spelling:",
+            clue: "A large area of land covered with trees and plants (n.)",
+            options: ["Forest", "Forrest", "Forrist"],
+            answer: "Forest"
+        },
+        {
+            type: "phrase",
+            badge: "Phrase Match",
+            prompt: "Train + ______",
+            clue: "The two metal tracks fixed to the ground (n. phr.)",
+            answer: "LINE"
+        },
+        {
+            type: "phrase",
+            badge: "Phrase Match",
+            prompt: "Green + ______",
+            clue: "Land in a town used for parks and outdoor areas (n.)",
+            answer: "SPACE"
+        }
+    ];
+
+    let currentIndex = 0;
+    let score = 0;
+
+    document.getElementById('total-questions').innerText = questions.length;
+
+    function renderQuestion() {
+        const q = questions[currentIndex];
+        document.getElementById('type-badge').innerText = q.badge;
+        document.getElementById('prompt').innerText = q.prompt;
+        document.getElementById('clue').innerText = "Clue: " + q.clue;
+        document.getElementById('feedback').innerText = "";
+        document.getElementById('feedback').className = "feedback";
+
+        const container = document.getElementById('interaction-area');
+        container.innerHTML = "";
+
+        if (q.type === "mc") {
+            const mcDiv = document.createElement('div');
+            mcDiv.className = 'mc-options';
+            q.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'mc-btn';
+                btn.innerText = opt;
+                btn.onclick = () => checkMC(opt);
+                mcDiv.appendChild(btn);
+            });
+            container.appendChild(mcDiv);
+        } else {
+            const inputGroup = document.createElement('div');
+            inputGroup.className = 'input-group';
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.id = 'text-input';
+            input.placeholder = q.type === 'vowel' ? 'Type full word...' : 'Type answer...';
+            input.onkeydown = (e) => { if (e.key === 'Enter') checkText(); };
+
+            const btn = document.createElement('button');
+            btn.className = 'action-btn';
+            btn.innerText = 'Submit';
+            btn.onclick = checkText;
+
+            inputGroup.appendChild(input);
+            inputGroup.appendChild(btn);
+            container.appendChild(inputGroup);
+            input.focus();
+        }
+    }
+
+    function checkText() {
+        const input = document.getElementById('text-input');
+        if (!input) return;
+        
+        const userAns = input.value.trim().toUpperCase();
+        const expected = questions[currentIndex].answer.toUpperCase();
+        const feedback = document.getElementById('feedback');
+
+        if (userAns === expected) {
+            feedback.innerText = "✓ Correct!";
+            feedback.className = "feedback correct";
+            score++;
+            document.getElementById('score').innerText = score;
+            setTimeout(nextQuestion, 1000);
+        } else {
+            feedback.innerText = "✗ Try again!";
+            feedback.className = "feedback incorrect";
+        }
+    }
+
+    function checkMC(selected) {
+        const expected = questions[currentIndex].answer;
+        const feedback = document.getElementById('feedback');
+
+        if (selected === expected) {
+            feedback.innerText = "✓ Correct!";
+            feedback.className = "feedback correct";
+            score++;
+            document.getElementById('score').innerText = score;
+            setTimeout(nextQuestion, 1000);
+        } else {
+            feedback.innerText = "✗ Incorrect choice, try again!";
+            feedback.className = "feedback incorrect";
+        }
+    }
+
+    function nextQuestion() {
+        currentIndex++;
+        if (currentIndex < questions.length) {
+            renderQuestion();
+        } else {
+            showCompletion();
+        }
+    }
+
+    function showCompletion() {
+        const gameBody = document.getElementById('game-body');
+        gameBody.innerHTML = `
+            <div class="completion-screen">
+                <h2>🎉 Great Job!</h2>
+                <p>You completed all spelling challenges!</p>
+                <p style="font-size: 1.3rem; font-weight: bold;">Final Score: ${score} / ${questions.length}</p>
+                <button class="restart-btn" onclick="location.reload()">Play Again</button>
+            </div>
+        `;
+    }
+
+    renderQuestion();
+</script>
+
+</body>
+</html>
